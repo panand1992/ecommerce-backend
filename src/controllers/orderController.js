@@ -96,13 +96,15 @@ module.exports = {
 						products: []
 					}
 					result.forEach((item) => {
-						const productObj = {
-							price: item.price,
-							name: item.productName,
-							quantity: item.quantity,
-							productId: item.productId
-						};
-						responseData.orderDetails.products.push(productObj);
+						if(item.price) {
+							const productObj = {
+								price: item.price,
+								name: item.productName,
+								quantity: item.quantity,
+								productId: item.productId
+							};
+							responseData.orderDetails.products.push(productObj);
+						}
 					});
 				}
 				return res.status(httpCodes.success).send(responseData);
