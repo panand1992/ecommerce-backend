@@ -24,7 +24,7 @@ module.exports = {
 		});
 	},
 
-	getUserDetails: function(data, callback) {
+	getUserSignupDetails: function(data, callback) {
 		var sql = "SELECT * FROM Users WHERE Username = ?";
 		var values = [];
 		values.push(data.username);
@@ -60,6 +60,43 @@ module.exports = {
 			+ " LEFT JOIN Products AS p ON p.ID = oi.ProductID WHERE p.VendorID = ? AND od.OrderStatus = 2 LIMIT 1";
 		var values = [];
         values.push(data.userId);
+		sqlConnection.executeQuery(sql, values, function(err, result) {
+			callback(err, result);
+		});
+	},
+
+	getUserDetails: function(data, callback) {
+		var sql = "SELECT u.Username AS username, ud.Name AS name, ud.Email as email, ud.Phone as phone, ud.Address as "
+			+ "address FROM Users AS u LEFT JOIN UserDetails AS ud ON u.ID = ud.UserID WHERE u.ID = ? LIMIT 1";
+		var values = [];
+		values.push(data.userId);
+		sqlConnection.executeQuery(sql, values, function(err, result) {
+			callback(err, result);
+		});
+	},
+
+	addUserDetails: function(data, callback) {
+		var sql = "INSERT INTO UserDetails (Name, Email, Phone, Address, UserID, CreatedAt, UpdatedAt) VALUES (?, ?, ?, ?, ?"
+			+ ", now(), now())";
+		var values = [];
+		values.push(data.name);
+		values.push(data.email);
+		values.push(data.phone);
+		values.push(data.address);
+		values.push(data.userId);
+		sqlConnection.executeQuery(sql, values, function(err, result) {
+			callback(err, result);
+		});
+	},
+
+	updateUserDetails: function(data, callback) {
+		var sql = "UPDATE UserDetails SET Name = ?, Email = ?, Phone = ?, Address = ?, UpdatedAt = now() WHERE UserID = ?";
+		var values = [];
+		values.push(data.name);
+		values.push(data.email);
+		values.push(data.phone);
+		values.push(data.address);
+		values.push(data.userId);
 		sqlConnection.executeQuery(sql, values, function(err, result) {
 			callback(err, result);
 		});

@@ -40,9 +40,8 @@ module.exports = {
 			msg: "Invalid params for signup"
 		};
 		if (data.username && data.password) {
-			User.getUserDetails(data, function(err, result){
+			User.getUserSignupDetails(data, function(err, result){
 				if (err) {
-					console.log(err);
 					responseData.msg = "Error in signup";
 					return res.status(httpCodes.internalServerError).send(responseData);
 				}
@@ -52,7 +51,6 @@ module.exports = {
 				} else {
 					User.signup(data, function (err1) {
 						if (err1) {
-							console.log(err1);
 							responseData.msg = "Error in signup";
 							return res.status(httpCodes.internalServerError).send(responseData);
 						}
@@ -138,6 +136,83 @@ module.exports = {
 					}
 				});
 				return res.status(httpCodes.success).send(responseData);
+			});
+		} else {
+			return res.status(httpCodes.badRequest).send(responseData);
+		}
+	},
+
+	getUserDetails: function(req, res) {
+		var data = req.body;
+		var responseData = {
+			success: false,
+			msg: "Invalid params for fetching user details"
+		};
+		if (data.userId) {
+			User.getUserDetails(data, function(err, result){
+				if (err) {
+					responseData.msg = "Error in signup";
+					return res.status(httpCodes.internalServerError).send(responseData);
+				}
+				responseData.success = true;
+				responseData.msg = "Successfully fetched user details";
+				if(result[0].name) {
+					responseData.userDetails = {
+						name: result[0].name,
+						email: result[0].email,
+						phone: result[0].phone,
+						address: result[0].address,
+						username: result[0].username
+					}
+				} else {
+					responseData.userDetails = {
+						name: '',
+						email: '',
+						phone: '',
+						address: '',
+						username: result[0].username
+					}
+				}
+				return res.status(httpCodes.success).send(responseData);
+			});
+		} else {
+			return res.status(httpCodes.badRequest).send(responseData);
+		}
+	},
+
+	updateUserDetails: function(req, res) {
+		var data = req.body;
+		var responseData = {
+			success: false,
+			msg: "Invalid params for updating user details"
+		};
+		if (data.userId) {
+			User.getUserDetails(data, function(err, result){
+				if (err) {
+					responseData.msg = "Error in updating user details";
+					return res.status(httpCodes.internalServerError).send(responseData);
+				}
+				if(result.length > 0 && result[0].name) {
+					User.updateUserDetails(data, function(err1, result1){
+						if (err1) {
+							responseData.msg = "Error in updating user details";
+							return res.status(httpCodes.internalServerError).send(responseData);
+						}
+						responseData.success = true;
+						responseData.msg = "Successfully updated user details";
+						return res.status(httpCodes.success).send(responseData);
+					});
+				} else {
+					User.addUserDetails(data, function(err1, result1){
+						if (err1) {
+							responseData.msg = "Error in updating user details";
+							return res.status(httpCodes.internalServerError).send(responseData);
+						}
+						responseData.success = true;
+						responseData.msg = "Successfully updated user details";
+						return res.status(httpCodes.success).send(responseData);
+					});
+				}
 			});
 		} else {
 			return res.status(httpCodes.badRequest).send(responseData);

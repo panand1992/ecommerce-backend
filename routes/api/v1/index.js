@@ -7,6 +7,8 @@ const orderController = require("../../../src/controllers/orderController");
 
 router.post("/user/login", userController.login);
 router.post("/user/signup", userController.signup);
+router.post("/user/details", userController.getUserDetails);
+router.post("/user/edit", userController.updateUserDetails);
 router.post("/user/vendor/details", userController.getVendorDetails);
 router.post("/user/vendor/payments", userController.getVendorPayments);
 router.post("/category/all", categoryController.listCategories);
