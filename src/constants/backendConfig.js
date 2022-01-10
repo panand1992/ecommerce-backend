@@ -28,5 +28,6 @@ module.exports = {
 	userType: {
 		user: 1,
 		vendor: 2
-	}
+	},
+	secretKey: 'relevel'
 };

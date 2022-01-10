@@ -22,27 +22,6 @@ module.exports = {
 		});
 	},
 
-	addProduct: function (req, res) {
-		var data = req.body;
-		var responseData = {
-			success: false,
-			msg: "Invalid params for adding product"
-		};
-		if (data.name && data.price && data.description && data.categoryId && data.vendorId) {
-			Product.addProduct(data, function (err) {
-				if (err) {
-					responseData.msg = "Error in adding product";
-					return res.status(httpCodes.internalServerError).send(responseData);
-				}
-				responseData.success = true;
-				responseData.msg ="Successfully added product";
-				return res.status(httpCodes.success).send(responseData);
-			});
-		} else {
-			return res.status(httpCodes.badRequest).send(responseData);
-		}
-	},
-
     getProductDetails: function (req, res) {
 		var data = req.body;
 		var responseData = {

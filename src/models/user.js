@@ -5,10 +5,9 @@ const {
 
 module.exports = {
 	login: function(data, callback) {
-		var sql = "SELECT ID as UserId, Username, UserType FROM Users WHERE Username = ? AND Password = ?";
+		var sql = "SELECT ID as UserId, Username, UserType, Password as password FROM Users WHERE Username = ?";
 		var values = [];
 		values.push(data.username);
-		values.push(data.password);
 		sqlConnection.executeQuery(sql, values, function(err, result) {
 			callback(err, result);
 		});
@@ -18,7 +17,7 @@ module.exports = {
 		var sql = "INSERT INTO Users (Username, Password, CreatedAt, UpdatedAt) VALUES (?, ?, now(), now())";
 		var values = [];
 		values.push(data.username);
-		values.push(data.password);
+		values.push(data.hashPwd);
 		sqlConnection.executeQuery(sql, values, function(err, result) {
 			callback(err, result);
 		});

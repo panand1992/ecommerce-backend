@@ -1,7 +1,11 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt');
 const {
-	httpCodes, userType
+	httpCodes, secretKey
 } = require("../constants/backendConfig");
+
+const saltRounds = 10;
 
 module.exports = {
 	login: function (req, res) {
@@ -20,13 +24,31 @@ module.exports = {
 					responseData.msg = "Invalid Email or Password";
 					return res.status(httpCodes.internalServerError).send(responseData);
 				}
-				responseData.success = true;
-				responseData.msg ="Successfully Logged In";
-				responseData.data = {
-					username: result[0].Username,
-					userId: result[0].UserId
-				};
-				return res.status(httpCodes.success).send(responseData);
+				bcrypt.compare(data.password, result[0].password, function(err1, result1) {
+					if (err1) {
+						responseData.msg = "Error in login";
+						return res.status(httpCodes.internalServerError).send(responseData);
+					}
+					if(!result1) {
+						responseData.msg = "Invalid Email or Password";
+						return res.status(httpCodes.internalServerError).send(responseData);
+					}	
+					responseData.success = true;
+					responseData.msg ="Successfully Logged In";
+					const userData = {
+						username: result[0].Username,
+						userId: result[0].UserId
+					}
+					const token = jwt.sign(userData, secretKey, {
+						expiresIn: "1h"
+					});
+					responseData.data = {
+						username: result[0].Username,
+						userId: result[0].UserId,
+						token
+					};
+					return res.status(httpCodes.success).send(responseData);
+				})
 			});
 		} else {
 			return res.status(httpCodes.badRequest).send(responseData);
@@ -49,93 +71,35 @@ module.exports = {
 					responseData.msg = "User already exists";
 					return res.status(httpCodes.internalServerError).send(responseData);
 				} else {
-					User.signup(data, function (err1) {
+					bcrypt.hash(data.password, saltRounds, function(err1, hash) {
 						if (err1) {
 							responseData.msg = "Error in signup";
 							return res.status(httpCodes.internalServerError).send(responseData);
 						}
-						responseData.success = true;
-						responseData.msg ="Successfully Signup Up";
-						responseData.data = {
-							username: data.username,
-							userId: result.insertId
-						};
-						return res.status(httpCodes.success).send(responseData);
-					});
-				}
-			});
-		} else {
-			return res.status(httpCodes.badRequest).send(responseData);
-		}
-	},
-
-	getVendorDetails: function (req, res) {
-		var data = req.body;
-		var responseData = {
-			success: false,
-			msg: "Invalid params for fetching vendor details"
-		};
-		if (data.userId) {
-			User.getVendorDetails(data, function (err, result) {
-				if (err) {
-					responseData.msg = "Error in fetching vendor details";
-					return res.status(httpCodes.internalServerError).send(responseData);
-				}
-				responseData.success = true;
-				responseData.msg ="Successfully fetched vendor details";
-				responseData.vendorDetails = {
-					username: result[0].username,
-					gstin: result[0].gstin,
-					pan: result[0].pan
-				};
-				return res.status(httpCodes.success).send(responseData);
-			});
-		} else {
-			return res.status(httpCodes.badRequest).send(responseData);
-		}
-	},
-
-	getVendorPayments: function (req, res) {
-		var data = req.body;
-		var responseData = {
-			success: false,
-			msg: "Invalid params for fetching vendor payments"
-		};
-		if (data.userId) {
-			User.getVendorPayments(data, function (err, result) {
-				if (err) {
-					responseData.msg = "Error in fetching vendor payments";
-					return res.status(httpCodes.internalServerError).send(responseData);
-				}
-				responseData.success = true;
-				responseData.msg ="Successfully fetched vendor payments";
-				responseData.vendorPayments = [];
-				result.forEach((item) => {
-					let foundOrder = false;
-					responseData.vendorPayments.forEach((item1) => {
-						if(item1.orderId == item.orderId) {
-							foundOrder = true;
-						}
-					});
-					if(!foundOrder) {
-						const orderObj = {
-							orderId: item.orderId,
-							total: item.total,
-							products: []
-						};
-						result.forEach((item2) => {
-							const productObj = {
-								price: item2.price,
-								name: item2.productName,
-								quantity: item2.quantity,
-								productId: item2.productId
+						data.hashPwd = hash;
+						User.signup(data, function (err2) {
+							if (err2) {
+								responseData.msg = "Error in signup";
+								return res.status(httpCodes.internalServerError).send(responseData);
+							}
+							responseData.success = true;
+							responseData.msg ="Successfully Signup Up";
+							const userData = {
+								username: data.username,
+								userId: result.insertId
+							}
+							const token = jwt.sign(userData, secretKey, {
+								expiresIn: "1h"
+							});
+							responseData.data = {
+								username: data.username,
+								userId: result.insertId,
+								token
 							};
-							orderObj.products.push(productObj);
+							return res.status(httpCodes.success).send(responseData);
 						});
-						responseData.vendorPayments.push(orderObj);
-					}
-				});
-				return res.status(httpCodes.success).send(responseData);
+					});
+				}
 			});
 		} else {
 			return res.status(httpCodes.badRequest).send(responseData);
