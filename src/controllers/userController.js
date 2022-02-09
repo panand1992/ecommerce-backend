@@ -77,7 +77,7 @@ module.exports = {
 							return res.status(httpCodes.internalServerError).send(responseData);
 						}
 						data.hashPwd = hash;
-						User.signup(data, function (err2) {
+						User.signup(data, function (err2, result2) {
 							if (err2) {
 								responseData.msg = "Error in signup";
 								return res.status(httpCodes.internalServerError).send(responseData);
@@ -86,14 +86,14 @@ module.exports = {
 							responseData.msg ="Successfully Signup Up";
 							const userData = {
 								username: data.username,
-								userId: result.insertId
+								userId: result2.insertId
 							}
 							const token = jwt.sign(userData, secretKey, {
 								expiresIn: "1h"
 							});
 							responseData.data = {
 								username: data.username,
-								userId: result.insertId,
+								userId: result2.insertId,
 								token
 							};
 							return res.status(httpCodes.success).send(responseData);
