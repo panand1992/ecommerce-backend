@@ -19,7 +19,7 @@ module.exports = {
 			database: "ecommerce"
 		},
 		prod: {
-			host: "relevel-ecommerce.cvyl0jb1nhb0.ap-south-1.rds.amazonaws.com",
+			host: "ecommerce-relevel.cvyl0jb1nhb0.ap-south-1.rds.amazonaws.com",
 			user: "relevel",
 			password: "Ecommerce#2021",
 			database: "ecommercedb"
